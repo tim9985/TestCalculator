@@ -1,0 +1,215 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.calculator {
+    background: linear-gradient(145deg, #2d2d44, #1a1a2e);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.display-container {
+    background: linear-gradient(145deg, #0d0d15, #1a1a2e);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.expression {
+    color: #8892b0;
+    font-size: 16px;
+    text-align: right;
+    min-height: 24px;
+    word-wrap: break-word;
+    margin-bottom: 10px;
+}
+
+.display {
+    color: #ccd6f6;
+    font-size: 36px;
+    text-align: right;
+    word-wrap: break-word;
+    font-weight: 300;
+}
+
+.mode-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.mode-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #8892b0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mode-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.mode-btn.active {
+    background: linear-gradient(145deg, #64ffda, #00bfa5);
+    color: #0a192f;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.btn {
+    padding: 18px 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn.number {
+    background: linear-gradient(145deg, #3d3d5c, #2d2d44);
+    color: #ccd6f6;
+}
+
+.btn.number:hover {
+    background: linear-gradient(145deg, #4a4a6a, #3d3d5c);
+}
+
+.btn.operator {
+    background: linear-gradient(145deg, #e94560, #c73e54);
+    color: white;
+}
+
+.btn.operator:hover {
+    background: linear-gradient(145deg, #f05674, #e94560);
+}
+
+.btn.function {
+    background: linear-gradient(145deg, #4a4a6a, #3d3d5c);
+    color: #64ffda;
+    font-size: 14px;
+}
+
+.btn.function:hover {
+    background: linear-gradient(145deg, #5a5a7a, #4a4a6a);
+}
+
+.btn.clear {
+    background: linear-gradient(145deg, #ff6b6b, #ee5a5a);
+    color: white;
+}
+
+.btn.clear:hover {
+    background: linear-gradient(145deg, #ff7c7c, #ff6b6b);
+}
+
+.btn.equals {
+    background: linear-gradient(145deg, #64ffda, #00bfa5);
+    color: #0a192f;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.btn.equals:hover {
+    background: linear-gradient(145deg, #7affea, #64ffda);
+}
+
+.memory-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.btn.memory {
+    background: linear-gradient(145deg, #2d2d44, #252538);
+    color: #8892b0;
+    font-size: 12px;
+    padding: 12px 8px;
+}
+
+.btn.memory:hover {
+    background: linear-gradient(145deg, #3d3d5c, #2d2d44);
+    color: #ccd6f6;
+}
+
+/* Responsive Design */
+@media (max-width: 420px) {
+    .calculator {
+        padding: 15px;
+    }
+
+    .btn {
+        padding: 14px 8px;
+        font-size: 14px;
+    }
+
+    .btn.function {
+        font-size: 12px;
+    }
+
+    .display {
+        font-size: 28px;
+    }
+
+    .expression {
+        font-size: 14px;
+    }
+}
+
+/* Animation for button press */
+@keyframes buttonPress {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.btn:active {
+    animation: buttonPress 0.1s ease;
+}
