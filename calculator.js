@@ -219,6 +219,154 @@ function toggleSign() {
     }
 }
 
+// Safe Expression Parser
+function safeEvaluate(expr) {
+    // Tokenize the expression
+    const tokens = tokenize(expr);
+    if (tokens === null) return NaN;
+    
+    // Parse and evaluate using shunting-yard algorithm
+    return parseExpression(tokens);
+}
+
+// Tokenize the expression into numbers and operators
+function tokenize(expr) {
+    const tokens = [];
+    let i = 0;
+    
+    while (i < expr.length) {
+        const char = expr[i];
+        
+        // Skip whitespace
+        if (/\s/.test(char)) {
+            i++;
+            continue;
+        }
+        
+        // Number (including decimals and negative numbers at start or after operator/parenthesis)
+        if (/[0-9.]/.test(char) || (char === '-' && (tokens.length === 0 || 
+            tokens[tokens.length - 1] === '(' || 
+            ['+', '-', '*', '/', '^'].includes(tokens[tokens.length - 1])))) {
+            let numStr = '';
+            if (char === '-') {
+                numStr = '-';
+                i++;
+            }
+            while (i < expr.length && /[0-9.eE+-]/.test(expr[i])) {
+                // Handle scientific notation
+                if ((expr[i] === 'e' || expr[i] === 'E') && i + 1 < expr.length) {
+                    numStr += expr[i];
+                    i++;
+                    if (expr[i] === '+' || expr[i] === '-') {
+                        numStr += expr[i];
+                        i++;
+                    }
+                } else if (expr[i] === '+' || expr[i] === '-') {
+                    break;
+                } else {
+                    numStr += expr[i];
+                    i++;
+                }
+            }
+            const num = parseFloat(numStr);
+            if (isNaN(num)) return null;
+            tokens.push(num);
+            continue;
+        }
+        
+        // Operators and parentheses
+        if (['+', '-', '*', '/', '^', '(', ')'].includes(char)) {
+            tokens.push(char);
+            i++;
+            continue;
+        }
+        
+        // Invalid character
+        return null;
+    }
+    
+    return tokens;
+}
+
+// Parse and evaluate expression using shunting-yard algorithm
+function parseExpression(tokens) {
+    const outputQueue = [];
+    const operatorStack = [];
+    
+    const precedence = { '+': 1, '-': 1, '*': 2, '/': 2, '^': 3 };
+    const rightAssociative = { '^': true };
+    
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        
+        if (typeof token === 'number') {
+            outputQueue.push(token);
+        } else if (['+', '-', '*', '/', '^'].includes(token)) {
+            while (operatorStack.length > 0) {
+                const top = operatorStack[operatorStack.length - 1];
+                if (top === '(') break;
+                
+                const topPrec = precedence[top];
+                const tokenPrec = precedence[token];
+                
+                if (topPrec > tokenPrec || (topPrec === tokenPrec && !rightAssociative[token])) {
+                    outputQueue.push(operatorStack.pop());
+                } else {
+                    break;
+                }
+            }
+            operatorStack.push(token);
+        } else if (token === '(') {
+            operatorStack.push(token);
+        } else if (token === ')') {
+            while (operatorStack.length > 0 && operatorStack[operatorStack.length - 1] !== '(') {
+                outputQueue.push(operatorStack.pop());
+            }
+            if (operatorStack.length === 0) return NaN; // Mismatched parentheses
+            operatorStack.pop(); // Remove the '('
+        }
+    }
+    
+    while (operatorStack.length > 0) {
+        const op = operatorStack.pop();
+        if (op === '(' || op === ')') return NaN; // Mismatched parentheses
+        outputQueue.push(op);
+    }
+    
+    // Evaluate the RPN expression
+    return evaluateRPN(outputQueue);
+}
+
+// Evaluate Reverse Polish Notation
+function evaluateRPN(tokens) {
+    const stack = [];
+    
+    for (const token of tokens) {
+        if (typeof token === 'number') {
+            stack.push(token);
+        } else {
+            if (stack.length < 2) return NaN;
+            const b = stack.pop();
+            const a = stack.pop();
+            let result;
+            
+            switch (token) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = a / b; break;
+                case '^': result = Math.pow(a, b); break;
+                default: return NaN;
+            }
+            
+            stack.push(result);
+        }
+    }
+    
+    if (stack.length !== 1) return NaN;
+    return stack[0];
+}
+
 // Calculate Result
 function calculate() {
     try {
@@ -228,8 +376,7 @@ function calculate() {
         fullExpression = fullExpression
             .replace(/×/g, '*')
             .replace(/÷/g, '/')
-            .replace(/−/g, '-')
-            .replace(/\^/g, '**');
+            .replace(/−/g, '-');
         
         // Remove extra spaces
         fullExpression = fullExpression.replace(/\s+/g, '');
@@ -238,9 +385,8 @@ function calculate() {
             return;
         }
 
-        // Evaluate the expression
-        // Using Function constructor for safer evaluation
-        const result = Function('"use strict"; return (' + fullExpression + ')')();
+        // Use safe expression evaluator
+        const result = safeEvaluate(fullExpression);
         
         if (isNaN(result) || !isFinite(result)) {
             currentInput = 'Error';
@@ -299,15 +445,24 @@ function memoryRecall() {
 }
 
 function memoryAdd() {
-    memory += parseFloat(currentInput) || 0;
+    const value = parseFloat(currentInput);
+    if (!isNaN(value)) {
+        memory += value;
+    }
 }
 
 function memorySubtract() {
-    memory -= parseFloat(currentInput) || 0;
+    const value = parseFloat(currentInput);
+    if (!isNaN(value)) {
+        memory -= value;
+    }
 }
 
 function memoryStore() {
-    memory = parseFloat(currentInput) || 0;
+    const value = parseFloat(currentInput);
+    if (!isNaN(value)) {
+        memory = value;
+    }
 }
 
 // Keyboard Support
